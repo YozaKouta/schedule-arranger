@@ -165,6 +165,51 @@ describe('/schedules/:scheduleId/users/:userId/comments', () => {
 });
 
 
+describe('/schedules/:scheduleId?edit=1', () => {
+    before(() => {
+        passportStub.install(app);
+        passportStub.login({ id: 0, username: 'testuser' });
+    });
+
+    after(() => {
+        passportStub.logout();
+        passportStub.uninstall(app);
+    });
+
+    it('予定が更新でき、候補が追加できる', (done) => {
+        User.upsert({ userId: 0, username: 'testuser' }).then(() => {
+            request(app)
+            .post('/schedules')
+            .send({ scheduleName: '草野球をしましょう', memo: 'in 板橋', candidates: '1/25(土)' })
+            .end((err, res) => {
+                const createdSchedulePath = res.headers.location;
+                const scheduleId = createdSchedulePath.split('/schedules/')[1];
+
+                // 更新がされることをテスト
+                request(app)
+                .post(`/schedules/${scheduleId}?edit=1`)
+                .send({ scheduleName: '焼き肉に変更', memo: 'in 有楽町', candidates: '1/26(日)' })
+                .end((err, res) => {
+                    Schedule.findByPk(scheduleId).then((s) => {
+                        assert.equal(s.scheduleName, '焼き肉に変更');
+                        assert.equal(s.memo, 'in 有楽町');
+                    });
+                    Candidate.findAll({
+                        where: { scheduleId: scheduleId },
+                        order: [['"candidateId"', 'ASC']]
+                    }).then((candidates) => {
+                        assert.equal(candidates.length, 2);
+                        assert.equal(candidates[0].candidateName, '1/25(土)');
+                        assert.equal(candidates[1].candidateName, '1/26(日)');
+                        deleteScheduleAggregate(scheduleId, done, err);
+                    });
+                });
+            });
+        });
+    });
+});
+
+
 function deleteScheduleAggregate(scheduleId, done, err) {
     const promiseCommentDestroy = Comment.findAll({
         where: { scheduleId: scheduleId }
