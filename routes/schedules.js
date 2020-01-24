@@ -223,6 +223,8 @@ function deleteScheduleAggregate(scheduleId, done, err) {
     });
 }
 
+router.deleteScheduleAggregate = deleteScheduleAggregate;
+
 function createCandidatesAndRedirect(candidateNames, scheduleId, res) {
     const candidates = candidateNames.map((c) => {
         return {
