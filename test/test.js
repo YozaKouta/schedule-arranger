@@ -25,7 +25,8 @@ describe('/login', () => {
     request(app)
       .get('/login')
       .expect('Content-Type', 'text/html; charset=utf-8')
-      .expect(/<a href="\/auth\/github"/)
+      //[Bootstrap](login.pug)ボタンにクラスを割り当てたため修正
+      .expect(/<a class="btn btn-info my-3" href="\/auth\/github"/)
       .expect(200, done);
   });
 
