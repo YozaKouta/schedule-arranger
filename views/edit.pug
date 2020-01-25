@@ -3,6 +3,7 @@ extends layout
 block content
   h3 予定の編集
   form(method="post", action=`/schedules/${schedule.scheduleId}?edit=1`)
+    input(type="hidden" name="_csrf" value!=csrfToken)
     div.form-group
       label(for="scheduleName") 予定名
       input(type="text" name="scheduleName" value=schedule.scheduleName)#scheduleName.form-control
@@ -21,6 +22,7 @@ block content
 
   h3.my-3 ※注意※
   form(method="post", action=`/schedules/${schedule.scheduleId}?delete=1`)
+    input(type="hidden" name="_csrf" value!=csrfToken)
     button(type="submit").btn.btn-danger この予定を削除する
     //- btn-primary, btn-secondary, btn-success, btn-info, btn-warning, btn-dangerなどでボタンの色が異なる
 
